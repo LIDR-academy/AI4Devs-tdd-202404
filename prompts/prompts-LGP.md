@@ -35,3 +35,5 @@ Quiero que antes de empezar me preguntes todas las dudas
 
 *Nota: me propone algunos casos límite, como por ejemplo "Fechas de inicio y fin de educación/experiencia laboral en el futuro o 
 Fechas de inicio posteriores a las fechas de fin", pero la propia aplicacion aún no contempla esos casos como errores, por lo que no creo esos tests*
+
+**-Prompt:** quiero que revises los test unitarios para saber si se podría hacer alguna mejora

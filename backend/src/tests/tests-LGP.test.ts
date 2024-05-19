@@ -32,73 +32,70 @@ function safeAssign<T, K extends keyof T>(obj: T, key: K, value: T[K]) {
 }
 
 describe('POST /candidates', () => {
-  const testCases = [
-    { field: 'firstName', value: undefined, expectedError: 'Error: Invalid name' },
-    { field: 'email', value: 'lauranotanemail', expectedError: 'Error: Invalid email' },
-    { field: 'phone', value: 'abc1234567', expectedError: 'Error: Invalid phone' },
-    { field: 'address', value: 'C'.repeat(101), expectedError: 'Error: Invalid address' },
-    { field: 'lastName', value: 'G' + 'a'.repeat(100), expectedError: 'Error: Invalid name' },
-    { field: 'educations', value: [{ institution: '', title: 'Ingeniería', startDate: '2020-01-01', endDate: '2020-01-02' }], expectedError: 'Error: Invalid institution' },
-    { field: 'workExperiences', value: [{ company: 'Empresa', position: '', startDate: '2020-01-01', endDate: '2020-01-02' }], expectedError: 'Error: Invalid position' },
-    { field: 'cv', value: { filePath: '', fileType: 'pdf' }, expectedError: 'Error: Invalid CV data' }
-  ];
+    const testCases = [
+        { field: 'firstName', value: undefined, expectedError: 'Error: Invalid name' },
+        { field: 'email', value: 'lauranotanemail', expectedError: 'Error: Invalid email' },
+        { field: 'phone', value: 'abc1234567', expectedError: 'Error: Invalid phone' },
+        { field: 'address', value: 'C'.repeat(101), expectedError: 'Error: Invalid address' },
+        { field: 'lastName', value: 'G' + 'a'.repeat(100), expectedError: 'Error: Invalid name' },
+        { field: 'educations', value: [{ institution: '', title: 'Ingeniería', startDate: '2020-01-01', endDate: '2020-01-02' }], expectedError: 'Error: Invalid institution' },
+        { field: 'workExperiences', value: [{ company: 'Empresa', position: '', startDate: '2020-01-01', endDate: '2020-01-02' }], expectedError: 'Error: Invalid position' },
+        { field: 'cv', value: { filePath: '', fileType: 'pdf' }, expectedError: 'Error: Invalid CV data' }
+    ];
 
-  test.each(testCases)('debería fallar si el campo $field es inválido', async ({ field, value, expectedError }) => {
-    const candidateData: CandidateData = {
-      firstName: 'Laura',
-      lastName: 'Garcia',
-      email: 'laura@example.com',
-      phone: '987654321',
-      address: 'Calle Falsa 123',
-      educations: [{ institution: 'Universidad', title: 'Ingeniería', startDate: '2020-01-01', endDate: '2020-01-02' }],
-      workExperiences: [{ company: 'Empresa', position: 'Ingeniero', startDate: '2020-01-01', endDate: '2020-01-02' }],
-      cv: { filePath: 'resume.pdf', fileType: 'pdf' }
-    };
-  
-    if (value !== undefined) {
-        safeAssign(candidateData, field as keyof CandidateData, value);
-    } else {
-        delete candidateData[field as keyof CandidateData];
-    }
+    let candidateData: CandidateData;
 
-    const response = await request(app).post('/candidates').send(candidateData);
-    expect(response.status).toBe(400);
-    expect(response.body.message).toContain(expectedError);
-  });
-
-  const successCases = [
-    { field: 'phone', expectedStatus: 201 },
-    { field: 'address', expectedStatus: 201 },
-    { field: 'workExperiences', value: [{ company: 'Empresa', position: 'Posicion', startDate: '2020-01-01', endDate: '' }], expectedStatus: 201 },
-  ];
-
-  test.each(successCases)('debería tener éxito sin el campo $field', async ({ field, expectedStatus }) => {
-    const candidateData: CandidateData = {
-      firstName: 'Laura',
-      lastName: 'Garcia',
-      email: 'laura@example.com',
-      phone: undefined, // Asegúrate de incluir todas las propiedades, incluso si son undefined
-      address: undefined,
-      educations: undefined,
-      workExperiences: undefined,
-      cv: undefined
-    };
-    delete candidateData[field as keyof CandidateData];
-
-    // Mock de la función post para evitar interacciones con la base de datos
-    const mockPost = jest.spyOn(request(app), 'post').mockImplementation(() => {
-        return Object.assign(request(app).post('/dummy'), {
-            send: () => Promise.resolve({
-                status: expectedStatus,
-                body: {}
-            })
-        });
+    beforeEach(() => {
+        // Configuración común
+        candidateData = {
+            firstName: 'Laura',
+            lastName: 'Garcia',
+            email: 'laura@example.com',
+            phone: '987654321',
+            address: 'Calle Falsa 123',
+            educations: [{ institution: 'Universidad', title: 'Ingeniería', startDate: '2020-01-01', endDate: '2020-01-02' }],
+            workExperiences: [{ company: 'Empresa', position: 'Ingeniero', startDate: '2020-01-01', endDate: '2020-01-02' }],
+            cv: { filePath: 'resume.pdf', fileType: 'pdf' }
+        };
+        jest.clearAllMocks();
     });
 
-    // Restaurar la función original después del test
-    mockPost.mockRestore();
-  });
+    // Test para verificar la validación de campos inválidos
+    test.each(testCases)('debería fallar si el campo $field es inválido', async ({ field, value, expectedError }) => {
+        if (value !== undefined) {
+            safeAssign(candidateData, field as keyof CandidateData, value);
+        } else {
+            delete candidateData[field as keyof CandidateData];
+        }
 
+        const response = await request(app).post('/candidates').send(candidateData);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toContain(expectedError);
+    });
+
+    const successCases = [
+        { field: 'phone', expectedStatus: 201 },
+        { field: 'address', expectedStatus: 201 },
+        { field: 'workExperiences', value: [{ company: 'Empresa', position: 'Posicion', startDate: '2020-01-01', endDate: '' }], expectedStatus: 201 },
+    ];
+
+    // Test para verificar la creación exitosa sin ciertos campos opcionales
+    test.each(successCases)('debería tener éxito sin el campo $field', async ({ field, expectedStatus }) => {
+        delete candidateData[field as keyof CandidateData];
+
+        // Mock de la función post para evitar interacciones con la base de datos
+        const mockPost = jest.spyOn(request(app), 'post').mockImplementation(() => {
+            return Object.assign(request(app).post('/dummy'), {
+                send: () => Promise.resolve({
+                    status: expectedStatus,
+                    body: {}
+                })
+            });
+        });
+
+        // Restaurar la función original después del test
+        mockPost.mockRestore();
+    });
 });
 
 describe('Guardar en la base de datos', () => {
@@ -129,28 +126,28 @@ describe('Guardar en la base de datos', () => {
 });
 
 describe('POST /upload', () => {
-  it('debería subir un archivo correctamente', async () => {
-    const storage = multer.memoryStorage();
-    const upload = multer({ storage });
+    it('debería subir un archivo correctamente', async () => {
+        const storage = multer.memoryStorage();
+        const upload = multer({ storage });
 
-    app.post('/upload', upload.single('file'), (req, res) => {
-      if (!req.file) {
-        return res.status(400).send({ error: 'No file uploaded' });
-      }
-      res.status(200).send({
-        filePath: 'mockpath/mockfile.pdf',
-        fileType: req.file.mimetype
-      });
+        app.post('/upload', upload.single('file'), (req, res) => {
+            if (!req.file) {
+                return res.status(400).send({ error: 'No file uploaded' });
+            }
+            res.status(200).send({
+                filePath: 'mockpath/mockfile.pdf',
+                fileType: req.file.mimetype
+            });
+        });
     });
-  });
 
-  it('debería manejar tipos de archivo no permitidos', async () => {
-    const res = await request(app)
-      .post('/upload')
-      .attach('file', Buffer.from('mock file content'), 'test.txt')
-      .on('error', (err) => {
-        console.error('Mock error:', err);
-      });
-    expect(res.status).toBe(400);
-  });
+    it('debería manejar tipos de archivo no permitidos', async () => {
+        const res = await request(app)
+            .post('/upload')
+            .attach('file', Buffer.from('mock file content'), 'test.txt')
+            .on('error', (err) => {
+                console.error('Mock error:', err);
+            });
+        expect(res.status).toBe(400);
+    });
 });
