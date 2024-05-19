@@ -75,6 +75,13 @@ const validateCV = (cv: any) => {
     if (typeof cv !== 'object' || !cv.filePath || typeof cv.filePath !== 'string' || !cv.fileType || typeof cv.fileType !== 'string') {
         throw new Error('Invalid CV data');
     }
+
+    const allowedExtensions = ['pdf', 'docx'];
+    const fileExtension = cv.filePath.split('.').pop();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+        throw new Error('Invalid CV file type. Only pdf and docx are allowed.');
+    }
 };
 
 export const validateCandidateData = (data: any) => {

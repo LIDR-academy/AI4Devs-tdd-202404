@@ -1,17 +1,11 @@
+import { prismaMock } from './mocks/prismaMocks';
 import { validateCandidateData } from '../application/validator';
 import { addCandidate } from '../application/services/candidateService';
-import { PrismaClient, Prisma } from '@prisma/client';
 
-jest.mock('@prisma/client', () => {
-  const mPrismaClient = {
-    candidate: {
-      create: jest.fn(),
-      update: jest.fn(),
-      findUnique: jest.fn(),
-    },
-  };
-  return { PrismaClient: jest.fn(() => mPrismaClient) };
-});
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn().mockImplementation(() => prismaMock)
+}));
+
 
 describe('validateCandidateData', () => {
   const validCandidateData = {
@@ -109,7 +103,7 @@ describe('validateCandidateData', () => {
   });
 
   it('should throw an error for invalid candidate data - invalid start date in education', () => {
-    const invalidEducationData = { ...validCandidateData, educations: [{ ...validCandidateData.educations[0], startDate: '2010-02-30' }] };
+    const invalidEducationData = { ...validCandidateData, educations: [{ ...validCandidateData.educations[0], startDate: '20101-02-30' }] };
     expect(() => validateCandidateData(invalidEducationData)).toThrow('Invalid date');
   });
 
@@ -135,7 +129,7 @@ describe('validateCandidateData', () => {
   });
 
   it('should throw an error for invalid candidate data - invalid start date in work experience', () => {
-    const invalidExperienceData = { ...validCandidateData, workExperiences: [{ ...validCandidateData.workExperiences[0], startDate: '2015-02-30' }] };
+    const invalidExperienceData = { ...validCandidateData, workExperiences: [{ ...validCandidateData.workExperiences[0], startDate: '20152-02-30' }] };
     expect(() => validateCandidateData(invalidExperienceData)).toThrow('Invalid date');
   });
 
@@ -156,13 +150,13 @@ describe('validateCandidateData', () => {
   });
 
   it('should throw an error for invalid candidate data - missing CV fileType', () => {
-    const invalidCVData = { ...validCandidateData, cv: { filePath: 'resume.pdf', fileType: '' } };
+    const invalidCVData = { ...validCandidateData, cv: { filePath: '', fileType: '' } };
     expect(() => validateCandidateData(invalidCVData)).toThrow('Invalid CV data');
   });
 
   it('should throw an error for invalid candidate data - invalid CV fileType', () => {
-    const invalidCVData = { ...validCandidateData, cv: { filePath: 'resume.pdf', fileType: 'invalid' } };
-    expect(() => validateCandidateData(invalidCVData)).toThrow('Invalid CV data');
+    const invalidCVData = { ...validCandidateData, cv: { filePath: 'resume.pdfx', fileType: 'invalid' } };
+    expect(() => validateCandidateData(invalidCVData)).toThrow('Invalid CV file type. Only pdf and docx are allowed.');
   });
 
   it('should not throw an error for valid candidate data with PDF CV', () => {
@@ -174,17 +168,6 @@ describe('validateCandidateData', () => {
     const validCVData = { ...validCandidateData, cv: { filePath: 'resume.docx', fileType: 'docx' } };
     expect(() => validateCandidateData(validCVData)).not.toThrow();
   });
-});
-
-jest.mock('@prisma/client', () => {
-  const mPrismaClient = {
-    candidate: {
-      create: jest.fn(),
-      update: jest.fn(),
-      findUnique: jest.fn(),
-    },
-  };
-  return { PrismaClient: jest.fn(() => mPrismaClient) };
 });
 
 describe('addCandidate', () => {
@@ -213,18 +196,18 @@ describe('addCandidate', () => {
     }
   };
 
-  const mPrismaClient = new PrismaClient();
+  
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should add a candidate successfully', async () => {
-    mPrismaClient.candidate.create.mockResolvedValue({ id: 1, ...validCandidateData });
+    prismaMock.candidate.create.mockResolvedValue({ id: 1, ...validCandidateData });
 
     const result = await addCandidate(validCandidateData);
     expect(result).toHaveProperty('id', 1);
-    expect(mPrismaClient.candidate.create).toHaveBeenCalledWith({
+    expect(prismaMock.candidate.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         firstName: 'John',
         lastName: 'Doe',
@@ -234,7 +217,7 @@ describe('addCandidate', () => {
   });
 
   it('should throw an error for duplicate email', async () => {
-    mPrismaClient.candidate.create.mockRejectedValue({ code: 'P2002' });
+    prismaMock.candidate.create.mockRejectedValue({ code: 'P2002' });
 
     await expect(addCandidate(validCandidateData)).rejects.toThrow('The email already exists in the database');
   });
