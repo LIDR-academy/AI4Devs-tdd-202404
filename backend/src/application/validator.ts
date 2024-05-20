@@ -30,7 +30,7 @@ const validateDate = (date: string) => {
 };
 
 const validateAddress = (address: string) => {
-    if (address && address.length > 100) {
+    if (!address || (address && address.length > 100)) {
         throw new Error('Invalid address');
     }
 };
@@ -78,30 +78,37 @@ const validateCV = (cv: any) => {
 };
 
 export const validateCandidateData = (data: any) => {
-    if (data.id) {
-        // If id is provided, we are editing an existing candidate, so fields are not mandatory
-        return;
-    }
-
-    validateName(data.firstName); 
-    validateName(data.lastName); 
-    validateEmail(data.email);
-    validatePhone(data.phone);
-    validateAddress(data.address);
-
-    if (data.educations) {
-        for (const education of data.educations) {
-            validateEducation(education);
+    try {
+        if (data.id) {
+            // If id is provided, we are editing an existing candidate, so fields are not mandatory
+            return;
         }
-    }
-
-    if (data.workExperiences) {
-        for (const experience of data.workExperiences) {
-            validateExperience(experience);
+    
+        validateName(data.firstName); 
+        validateName(data.lastName); 
+        validateEmail(data.email);
+        validatePhone(data.phone);
+        validateAddress(data.address);
+    
+        if (data.educations) {
+            for (const education of data.educations) {
+                validateEducation(education);
+            }
         }
-    }
-
-    if (data.cv && Object.keys(data.cv).length > 0) {
-        validateCV(data.cv);
+    
+        if (data.workExperiences) {
+            for (const experience of data.workExperiences) {
+                validateExperience(experience);
+            }
+        }
+    
+        if (data.cv && Object.keys(data.cv).length > 0) {
+            validateCV(data.cv);
+        }
+    
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
     }
 };

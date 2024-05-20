@@ -1,0 +1,62 @@
+1. actua como un desarrollador javascript, experto en testing, ayudame a crear TDD para mi proyecto @backend , usaremos Jest para las pruebas, el proyecto ha sido creado en typescript, no escribas ningún código aún, vamos paso a paso con las instrucciones, dime si existe alguna dependencia faltante antes de comenzar
+2. puedes darme los pasos a seguir?
+3.  es  una versión básica de la funcionalidad de inserción de nuevos candidatos. Se trata de un componente clave de un ATS, ya que los datos de candidatos son el activo más valioso. se utilizaba un formulario web para insertar nuevos candidatos, que puede ser una interfaz muy útil para RRHH y hiring managers, pero se recibirán via API desde múltiples fuentes, como aplicación directa del candidato, o sistemas de parsing automatizado. vamos a crear las pruebas unitarias para el proyecto usando el archivo test-iniciales.test.ts
+4. Genera en @tests-iniciales.test.ts las pruebas unitarias que cubran todos los posibles escenarios de @validator.ts 
+5. todas las funciones probadas son privadas, puedes mantener toda la logica de las pruebas pero aplicada al método público validateCandidateData ?
+6. ahora que validamos los datos de entrada de un candidato, puedes ayudarme a probar los @models para guardar en base de datos? no quiero guardar los datos en la base de datos, genera un mock para probar estas funcionalidades, agrega los test al archivo @tests-iniciales.test.ts 
+7. el test `should return true for valid candidate data` arroja el siguiente error: Expected: true
+Received: undefined; vamos a corregirlo.
+8. vamos a refactorizar los test para no duplicar código y poder reusar el objeto mock "validCandidateData" en el test "should return true for valid candidate data" para los demás casos de prueba
+9. Existen errores en las pruebas, tales como Expected false, received: true para las validaciones
+```
+⋊> ~/D/l/0/backend on jest ⨯ npm run test                                                      22:39:23
+> backend@1.0.0 test
+> jest
+ FAIL  src/__tests__/tests-iniciales.test.ts
+  Validator
+    validateCandidateData
+      ✓ should return true for valid candidate data (1 ms)
+      ✓ should return false for invalid candidate data (name)
+      ✓ should return false for invalid candidate data (email) (1 ms)
+      ✓ should return false for invalid candidate data (phone)
+      ✓ should return false for invalid candidate data (address)
+      ✕ should return false for invalid candidate data (education) (2 ms)
+      ✕ should return false for invalid candidate data (experience)
+      ✓ should return false for invalid candidate data (cv)
+  Models
+    ✓ should create a new Candidate instance
+    ✓ should create a new Education instance
+    ✓ should create a new WorkExperience instance
+    ✓ should create a new Resume instance
+  ● Validator › validateCandidateData › should return false for invalid candidate data (education)
+    expect(received).toBe(expected) // Object.is equality
+    Expected: false
+    Received: true
+      49 |     it('should return false for invalid candidate data (education)', () => {
+      50 |       const invalidCandidateData = { ...validCandidateData, education: [{ degree: 'Bachelor'
+      50 |       const invalidCandidateData = { ...validCandidateData, education: [{ degree: 'Bachelor', startDate: '2020-01-01' }] };
+    > 51 |       expect(validateCandidateData(invalidCandidateData)).toBe(false);
+         |                                                           ^
+      52 |     });
+      53 |
+      54 |     it('should return false for invalid candidate data (experience)', () => {
+      at Object.<anonymous> (src/__tests__/tests-iniciales.test.ts:51:59)
+  ● Validator › validateCandidateData › should return false for invalid candidate data (experience)
+    expect(received).toBe(expected) // Object.is equality
+    Expected: false
+    Received: true
+      54 |     it('should return false for invalid candidate data (experience)', () => {
+      55 |       const invalidCandidateData = { ...validCandidateData, experience: [{ position: 'Develo
+      55 |       const invalidCandidateData = { ...validCandidateData, experience: [{ position: 'Developer', startDate: '2020-01-01' }] };
+    > 56 |       expect(validateCandidateData(invalidCandidateData)).toBe(false);
+         |                                                           ^
+      57 |     });
+      58 |
+      59 |     it('should return false for invalid candidate data (cv)', () => {
+      at Object.<anonymous> (src/__tests__/tests-iniciales.test.ts:56:59)
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 10 passed, 12 total
+Snapshots:   0 total
+Time:        1.426 s, estimated 2 s
+Ran all test suites.
+```
