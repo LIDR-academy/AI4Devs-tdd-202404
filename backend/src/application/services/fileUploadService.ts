@@ -1,8 +1,13 @@
 import multer from 'multer';
 import { Request, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, '../uploads');
+        console.log("L;a ruta es: ", uploadPath);
+        fs.mkdirSync(uploadPath, { recursive: true });
         cb(null, '../uploads/');
     },
     filename: function (req, file, cb) {
@@ -29,7 +34,9 @@ const upload = multer({
 
 export const uploadFile = (req: Request, res: Response) => {
     const uploader = upload.single('file');
+    console.log("El uploader es: ", uploader);
     uploader(req, res, function (err) {
+        console.log("El error es: ", err);
         if (err instanceof multer.MulterError) {
             // Manejo de errores específicos de Multer
             return res.status(500).json({ error: err.message });
