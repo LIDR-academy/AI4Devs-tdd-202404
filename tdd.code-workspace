@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": ".",
+            "name": "tdd"
+		},
+        {
+            "path": "./backend",
+            "name": "backend"
+        },
+        {
+            "path": "./frontend",
+            "name": "frontend"
+        }
+	],
+	"settings": {
+	}
+}
