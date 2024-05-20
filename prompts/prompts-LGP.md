@@ -37,3 +37,7 @@ Quiero que antes de empezar me preguntes todas las dudas
 Fechas de inicio posteriores a las fechas de fin", pero la propia aplicacion aún no contempla esos casos como errores, por lo que no creo esos tests*
 
 **-Prompt:** quiero que revises los test unitarios para saber si se podría hacer alguna mejora
+
+**-Prompt:** quiero que revises los tests @tests-LGP.test.ts y que hagas las modificaciones necesarias para convertirlos en test unitarios, enfocados a cubrir los metodos de @candidateService.ts y @fileUploadService.ts 
+
+Antes de hacer los cambios quiero que me preguntes las dudas y que me muestres cómo lo harás
