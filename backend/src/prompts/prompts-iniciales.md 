@@ -60,3 +60,10 @@ Snapshots:   0 total
 Time:        1.426 s, estimated 2 s
 Ran all test suites.
 ```
+10. ya tengo jest y algunas pruebas funcionando, me gustaria probar las funcionalidades de mi @backend para agregar candidatos, por favor genera un mock de los datos para no insertar nuevos datos en la base de datos, no comiences a escribir el código, hazme todas las pregunas antes de comenzar
+11. puedes encontrar los datos en la carpeta @models especialmente en @Candidate.ts
+12. me puedes sugerir donde debo crear este archivo?
+13. ya he creado el archivo, continuemos
+14. vamos a crear un mock de la base de datos usando prisma para no insertar nuevos registros de candidatos en la base de datos real, como podemos hacer un mock de la base de datos?
+15. ahora quiero que agregues todos los casos relacionados para probar la funcionalidad de 
+16. por favor agrega los metodos faltantes al archivo @prismaMock tales como education, workExperience y todos los que consideres necesarios
