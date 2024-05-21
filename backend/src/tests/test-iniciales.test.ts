@@ -1,4 +1,5 @@
 import { validateCandidateData } from "../application/validator";
+import { addCandidate } from "../application/services/candidateService";
 
 
 // CANDIDATE DATA VALIDATION
@@ -184,6 +185,126 @@ describe('Candidate Data Validation', () => {
 });
 
 
+import { PrismaClient } from '@prisma/client';
+// CANDIDATE ADDING SERVICE
+describe('addCandidate', () => {
+    it('should add a candidate successfully', async () => {
+      
+        const candidateData = {
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@example.com',
+            phone: '623456789',
+            address: '123 Main St, Anytown, AT 12345',
+            educations: [
+                { institution: 'University A', title: 'Bachelor of Science', startDate: '2010-09-01', endDate: '2014-06-30' },
+                { institution: 'University B', title: 'Master of Science', startDate: '2015-09-01', endDate: '2017-06-30' }
+            ],
+            workExperiences: [
+                { company: 'Company A', position: 'Developer', description: 'Developed various applications', startDate: '2018-01-01', endDate: '2020-12-31' },
+                { company: 'Company B', position: 'Senior Developer', description: 'Led a team of developers', startDate: '2021-01-01', endDate: '2023-01-01' }
+            ],
+            cv: { filePath: 'path/to/resume.pdf', fileType: 'pdf' }
+        };
+        const prisma = new PrismaClient();
+        const result = await addCandidate(candidateData);
+        expect(result.id).toBe(1);
+        expect(result.firstName).toBe('John');
+        expect(result.lastName).toBe('Doe');
+        expect(result.email).toBe('john.doe@example.com');
+        expect(result.phone).toBe('623456789');
+        expect(result.address).toBe('123 Main St, Anytown, AT 12345');
+
+        expect(prisma.candidate.create).toHaveBeenCalled();
+        expect(prisma.candidate.create).toHaveBeenCalledWith({
+            data: {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@example.com',
+                phone: '623456789',
+                address: '123 Main St, Anytown, AT 12345'
+              }
+        });
+        expect(prisma.education.create).toHaveBeenCalled();
+        expect(prisma.education.create).toHaveBeenCalledWith(
+            { data: 
+                {"candidateId": 1, 
+                "endDate": new Date("2014-06-30"), 
+                "institution": "University A", "startDate": new Date("2010-09-01"), 
+                "title": "Bachelor of Science"}}
+        );
+        expect(prisma.education.create).toHaveBeenCalledWith(
+            {data: {"candidateId": 1, "endDate": new Date("2014-06-30"), "institution": "University A", "startDate": new Date("2010-09-01"), "title": "Bachelor of Science"}}
+        );
+        expect(prisma.workExperience.create).toHaveBeenCalled();
+        expect(prisma.workExperience.create).toHaveBeenCalledWith(
+            {data: {"candidateId": 1, "company": "Company A", "description": "Developed various applications", "endDate": new Date("2020-12-31"), "position": "Developer", "startDate": new Date("2018-01-01")}}
+        );
+        expect(prisma.workExperience.create).toHaveBeenCalledWith(
+            {data: {"candidateId": 1, "company": "Company B", "description": "Led a team of developers", "endDate": new Date("2023-01-01"), "position": "Senior Developer", "startDate": new Date("2021-01-01")}}
+        );
+        expect(prisma.resume.create).toHaveBeenCalled();
+        expect(prisma.resume.create).toHaveBeenCalledWith(
+            {data: {"candidateId": 1, "filePath": "path/to/resume.pdf", "fileType": "pdf", "uploadDate": expect.any(Date)}}
+        );
+    });
 
 
+  
+  });
 
+
+// CANDIDATE ADDING SERVICE WITH MOCKING VALIDATION
+describe('addCandidate mocking validation', () => {
+
+    beforeEach(() => {
+        jest.resetModules(); // Reset modules to ensure clean state
+        jest.mock('../application/validator', () => ({
+          validateCandidateData: jest.fn(() => {
+            throw new Error('Invalid candidate data');
+          })
+        }));
+      });
+    
+    it('should throw an error if candidate data validation fails', async () => {
+
+        const { addCandidate } = await import('../application/services/candidateService');
+        const candidateData = {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane.doe@example.com',
+        phone: '1234567890',
+        address: '456 Elm St, Othertown, OT 67890'
+        };
+        
+        await expect(addCandidate(candidateData)).rejects.toThrow('Invalid candidate data');
+    });
+    afterEach(() => {
+        jest.restoreAllMocks(); // Restore all mocks to their original state
+    });
+
+});
+
+
+// TESTING MODELS (CANDIDATE) 
+// Testear modelos y servicios de dominio por separado añade demasiada complejidad para el beneficio de 
+// desacoplar el testing. 
+// Esto hace que el testing sea mas lento y complejo. 
+// Por eso, solo se realizan tests de integración. 
+
+import { Candidate } from '../domain/models/Candidate';
+
+describe('addCandidate', () => {
+    it('should add a candidate successfully', async () => {
+
+        // Create a new candidate instance
+        const candidate = new Candidate({ firstName: 'John', lastName: 'Doe', email: 'john@example.com' });
+
+        // Call the save method which should internally use prisma.candidate.create
+        const savedCandidate = await candidate.save();
+
+        // Assert that the returned object has the expected properties
+        expect(savedCandidate).toEqual(expect.objectContaining({ id: 1, firstName: 'John', lastName: 'Doe' }));
+    });
+
+});

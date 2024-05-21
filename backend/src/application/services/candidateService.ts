@@ -53,3 +53,4 @@ export const addCandidate = async (candidateData: any) => {
         }
     }
 };
+
