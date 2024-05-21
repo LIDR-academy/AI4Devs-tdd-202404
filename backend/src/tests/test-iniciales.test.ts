@@ -285,7 +285,6 @@ describe('addCandidate mocking validation', () => {
 
 });
 
-
 // TESTING MODELS (CANDIDATE) 
 // Testear modelos y servicios de dominio por separado añade demasiada complejidad para el beneficio de 
 // desacoplar el testing. 
@@ -308,3 +307,44 @@ describe('addCandidate', () => {
     });
 
 });
+
+
+
+// CANDIDATE CONTROLLER
+import request from 'supertest';
+import { app } from "../index";
+
+describe('POST /candidate', () => {
+    it('should create a candidate and return 201 status', async () => {
+        const candidateData = {
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@example.com'
+        };
+        const response = await request(app)
+            .post('/candidates')
+            .send(candidateData);
+        expect(response.status).toBe(201);
+        expect(response.body).toEqual(expect.objectContaining({
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john.doe@example.com'
+        }));
+    });
+
+    it('should return 400 status for invalid candidate data', async () => {
+        const candidateData = {
+            firstName: '', // Invalid data
+            lastName: 'Doe',
+            email: 'john.doe@example.com'
+        };
+        const response = await request(app)
+            .post('/candidates')
+            .send(candidateData);
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual(expect.objectContaining({
+            message: 'Error: Invalid name'
+        }));
+    });
+});
+

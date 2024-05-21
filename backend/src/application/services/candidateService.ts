@@ -5,6 +5,7 @@ import { WorkExperience } from '../../domain/models/WorkExperience';
 import { Resume } from '../../domain/models/Resume';
 
 export const addCandidate = async (candidateData: any) => {
+    console.log('******candidateData: ', candidateData);
     try {
         validateCandidateData(candidateData); // Validar los datos del candidato
     } catch (error: any) {
