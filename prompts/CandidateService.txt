@@ -1,0 +1,45 @@
+# Prompts
+
+## Prompt 1:
+Teniendo este bac@backend ckend escrito en Node js con typescript en el que tiene un servicio 
+@candidateService.ts idateService.ts quiero que me proporciones una suite de tests.
+
+Antes de esto quiero que me des una lista de los escenarios que vamos a testear 
+utilizando @Jest js y aplicando las mejores practicas para comprobar que cubrimos todos los casos.
+
+No escribas codigo aun
+
+## Prompt 2:    
+
+Perfecto ahora si! Procede con el codigo.
+
+Recuerda utilizar mocks para las funciones de Prisma y las validaciones para asegurarnos que estas 
+pruebas unitarias no dependan de la base de datos real
+
+Haz mocks tambien para los modelos y sus metodos para que no tengamos errores al ejecutar los test 
+
+Escribiremos los test en @test-nvm.test.ts 
+
+## Prompt 3:
+
+tengo un error de que no encuentra la base de datos, podrias hacer un mock para que no intente hacer una llamada real a la base de datos?
+
+## Prompt 4:
+
+todos los metodos .mockImplementation me dan el siguiente error:
+
+TypeError: Cannot read properties of undefined (reading 'mockImplementation')
+
+Podrias hacer un mock para Prisma que incluya todos sus modelos (candidate, education, resume y 
+workexperience) y añades el metodo transaction?
+
+## Prompt 5:
+
+en los test:
+- unique email constraint violation
+- general error during save operation
+
+Obtengo el mismo error:
+"Cannot read properties of undefined (reading 'id')"
+En la linea ->  24 const candidateId = savedCandidate.id; 
+@test-nvm.test.ts @candidateService.ts 
